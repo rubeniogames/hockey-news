@@ -3,268 +3,224 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KHL / VHL Web App</title>
+  <title>RoofCalc Mini App</title>
   <style>
-    :root { --bg:#0b1220; --card:#131d33; --line:#23314f; --text:#e9eef9; --muted:#99a7c2; --accent:#34c3ff; --ok:#33d17a; }
+    :root {
+      --bg: #0f172a;
+      --card: #111c34;
+      --line: #2a3f68;
+      --text: #e6efff;
+      --muted: #9bb0d6;
+      --accent: #4da3ff;
+      --ok: #39d98a;
+      --warn: #f7b955;
+    }
+
     * { box-sizing: border-box; }
-    body { margin:0; font-family:Inter,system-ui,Arial,sans-serif; background:var(--bg); color:var(--text); }
-    .container { max-width:920px; margin:0 auto; padding:16px; }
-    .title { font-size:24px; font-weight:800; }
-    .subtitle { color:var(--muted); margin:2px 0 14px; }
-    .tabs { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
-    .tab { background:var(--card); border:1px solid var(--line); color:var(--text); border-radius:12px; padding:12px; font-weight:700; cursor:pointer; }
-    .tab.active { border-color:var(--accent); box-shadow:0 0 0 2px rgba(52,195,255,.2) inset; }
-    .screen { display:none; } .screen.active { display:block; }
-    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
-    .card h2 { margin:0 0 10px; font-size:18px; }
-    .meta { color:var(--muted); font-size:13px; }
-    .match { display:grid; grid-template-columns:1fr auto; gap:10px; padding:10px 0; border-top:1px solid var(--line); }
-    .match:first-child { border-top:0; padding-top:0; }
-    .teams { font-weight:600; }
-    .score { font-weight:800; }
-    .empty { color:var(--muted); }
-    .article { padding:10px 0; border-top:1px solid var(--line); }
-    .article:first-child { border-top:0; padding-top:0; }
-    .article-title { font-weight:700; margin-bottom:4px; }
-    .article-date, .small { color:var(--muted); font-size:12px; }
+    body { margin: 0; font-family: Inter, system-ui, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 820px; margin: 0 auto; padding: 16px; }
+    h1 { margin: 0 0 6px; font-size: 24px; }
+    .subtitle { color: var(--muted); margin-bottom: 16px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .card h2 { margin-top: 0; font-size: 18px; }
+    .grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 13px; color: var(--muted); }
+    input, select, button {
+      background: #0d162a;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(180deg, #2b79db, #195fbc);
+      border-color: #2f78d1;
+      font-weight: 700;
+    }
+    .result { font-size: 15px; line-height: 1.4; }
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .scheme {
+      width: 100%;
+      max-width: 640px;
+      margin: 8px auto 0;
+      display: block;
+      background: #0d162a;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .footer { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="title">Новости КХЛ и ВХЛ</div>
-    <div class="subtitle">Источник: основной сайт КХЛ · live: 15 сек · расписание: 12 часов</div>
+<div class="container">
+  <h1>RoofCalc · MVP</h1>
+  <div class="subtitle">Телеграм-миниприложение: расчет двускатной крыши (черновой инженерный помощник)</div>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="home">Главная</button>
-      <button class="tab" data-tab="about">О нас</button>
+  <div class="card">
+    <h2>1) Входные данные</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="span">Пролет между опорами, м</label>
+        <input id="span" type="number" min="2" max="20" step="0.1" value="8" />
+      </div>
+      <div class="field">
+        <label for="length">Длина дома (по коньку), м</label>
+        <input id="length" type="number" min="4" max="30" step="0.1" value="10" />
+      </div>
+      <div class="field">
+        <label for="pitch">Угол ската, °</label>
+        <input id="pitch" type="number" min="10" max="60" step="1" value="30" />
+      </div>
+      <div class="field">
+        <label for="step">Шаг стропил, м</label>
+        <input id="step" type="number" min="0.4" max="1.2" step="0.05" value="0.6" />
+      </div>
+      <div class="field">
+        <label for="snow">Снеговая нагрузка, кг/м²</label>
+        <input id="snow" type="number" min="50" max="500" step="5" value="180" />
+      </div>
+      <div class="field">
+        <label for="wind">Ветровая нагрузка, кг/м²</label>
+        <input id="wind" type="number" min="10" max="120" step="5" value="35" />
+      </div>
+      <div class="field">
+        <label for="roofType">Тип покрытия</label>
+        <select id="roofType">
+          <option value="45">Металлочерепица (~45 кг/м²)</option>
+          <option value="60">Профнастил (~60 кг/м²)</option>
+          <option value="75">Гибкая черепица (~75 кг/м²)</option>
+          <option value="90">Натуральная черепица (~90 кг/м²)</option>
+        </select>
+      </div>
     </div>
-
-    <section id="home" class="screen active">
-      <div class="card">
-        <h2>Матчи идут сейчас</h2>
-        <div id="live-meta" class="meta">Загрузка…</div>
-        <div id="live-list"></div>
-      </div>
-
-      <div class="card">
-        <h2>Матчи на завтра</h2>
-        <div id="tomorrow-meta" class="meta">Загрузка…</div>
-        <div id="tomorrow-list"></div>
-      </div>
-
-      <div class="card">
-        <h2>Статьи из GitHub (articles.txt)</h2>
-        <div id="articles-list"></div>
-      </div>
-    </section>
-
-    <section id="about" class="screen">
-      <div class="card">
-        <h2>О нас</h2>
-        <p>Telegram Web App по новостям КХЛ/ВХЛ.</p>
-        <p>Текущие матчи обновляются раз в 15 секунд.</p>
-        <p>Матчи, которые еще не начались (завтра), обновляются раз в 12 часов.</p>
-      </div>
-      <div class="small">Данные матчей берутся с основного сайта КХЛ (через бесплатный CORS proxy).</div>
-    </section>
+    <div style="margin-top: 12px;"><button id="calcBtn">Рассчитать</button></div>
   </div>
 
+  <div class="card">
+    <h2>2) Результат расчета (MVP)</h2>
+    <div id="result" class="result">Нажмите «Рассчитать».</div>
+  </div>
+
+  <div class="card">
+    <h2>3) Схема двускатной крыши</h2>
+    <svg id="scheme" class="scheme" viewBox="0 0 640 240" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="footer">Важно: текущая версия — предварительный расчет для типовой схемы. Перед строительством нужна проверка инженером-конструктором.</div>
+  </div>
+</div>
+
 <script>
-  const PROXY = 'https://api.allorigins.win/raw?url=';
-  const LIVE_REFRESH_MS = 15000;
-  const UPCOMING_TTL_MS = 12 * 60 * 60 * 1000;
+  const sections = [
+    { name: '50×150', w: 5.15, i: 1406 },
+    { name: '50×200', w: 8.33, i: 3333 },
+    { name: '50×225', w: 10.55, i: 4746 },
+    { name: '50×250', w: 13.02, i: 6510 },
+    { name: '63×200', w: 10.50, i: 4200 },
+    { name: '75×200', w: 12.50, i: 5000 }
+  ];
 
-  function esc(v) {
-    return String(v ?? '').replace(/[&<>"']/g, (s) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+  const sigmaAllow = 13; // МПа условно для C24 с запасом в MVP
+  const eWood = 10000; // МПа
+  const deflectionLimitRatio = 200; // L/200
+
+  function readNum(id) {
+    return Number(document.getElementById(id).value);
   }
 
-  function ymd(d) { return d.toISOString().slice(0, 10); }
-  function moscowTime(isoOrTs) {
-    const date = typeof isoOrTs === 'number' ? new Date(isoOrTs * 1000) : new Date(isoOrTs);
-    return new Intl.DateTimeFormat('ru-RU', { timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit' }).format(date);
-  }
+  function drawScheme(span, pitch) {
+    const svg = document.getElementById('scheme');
+    const h = Math.tan(pitch * Math.PI / 180) * (span / 2);
 
-  function khlCalendarUrl(dateObj) {
-    const y = dateObj.getUTCFullYear();
-    const m = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(dateObj.getUTCDate()).padStart(2, '0');
-    return `https://www.khl.ru/calendar/${y}/${m}/${d}/`;
-  }
+    const baseY = 195;
+    const leftX = 80;
+    const rightX = 560;
+    const ridgeX = (leftX + rightX) / 2;
 
-  async function fetchKhlHtml(dateObj) {
-    const url = khlCalendarUrl(dateObj);
-    const res = await fetch(PROXY + encodeURIComponent(url), { cache: 'no-store' });
-    if (!res.ok) throw new Error('khl_fetch_error');
-    return res.text();
-  }
+    const scaledH = Math.min(120, h * 18);
+    const ridgeY = baseY - scaledH;
 
-  function normalizeJsonLd(obj) {
-    if (!obj) return [];
-    if (Array.isArray(obj)) return obj.flatMap(normalizeJsonLd);
-    if (obj['@graph']) return normalizeJsonLd(obj['@graph']);
-    return [obj];
-  }
-
-  function parseKhlMatchesFromHtml(html) {
-    const matches = [];
-    const scriptRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-    const chunks = [...html.matchAll(scriptRegex)].map((m) => m[1]).filter(Boolean);
-
-    for (const raw of chunks) {
-      try {
-        const parsed = JSON.parse(raw.trim());
-        const nodes = normalizeJsonLd(parsed);
-        for (const node of nodes) {
-          const t = String(node?.['@type'] || '').toLowerCase();
-          if (!t.includes('sportsevent') && !t.includes('event')) continue;
-
-          const home = node?.homeTeam?.name || '';
-          const away = node?.awayTeam?.name || '';
-          if (!home || !away) continue;
-
-          const status = String(node?.eventStatus || node?.status || '').toLowerCase();
-          const start = node?.startDate || node?.startTime || '';
-
-          let score = '—';
-          if (typeof node?.name === 'string') {
-            const sm = node.name.match(/(\d+\s*[:\-]\s*\d+)/);
-            if (sm) score = sm[1].replace(/\s+/g, '');
-          }
-
-          matches.push({
-            homeTeam: { name: home },
-            awayTeam: { name: away },
-            status: { type: status, description: status || 'scheduled' },
-            startDate: start,
-            score,
-          });
-        }
-      } catch (_) {}
-    }
-
-    const uniq = new Map();
-    for (const m of matches) {
-      const key = `${m.homeTeam.name}|${m.awayTeam.name}|${m.startDate}`;
-      uniq.set(key, m);
-    }
-    return [...uniq.values()];
-  }
-
-  function isLive(match) {
-    const st = String(match?.status?.type || '').toLowerCase();
-    return st.includes('inprogress') || st.includes('live') || st.includes('ongoing');
-  }
-
-  function matchRow(m) {
-    const time = m.startDate ? moscowTime(m.startDate) : '—';
-    return `
-      <div class="match">
-        <div>
-          <div class="teams">${esc(m.homeTeam?.name)} — ${esc(m.awayTeam?.name)}</div>
-          <div class="meta">${esc(m.status?.description || 'scheduled')} · ${time} МСК</div>
-        </div>
-        <div class="score">${esc(m.score || '—')}</div>
-      </div>
+    svg.innerHTML = `
+      <line x1="${leftX}" y1="${baseY}" x2="${rightX}" y2="${baseY}" stroke="#5373ac" stroke-width="4" />
+      <line x1="${leftX}" y1="${baseY}" x2="${ridgeX}" y2="${ridgeY}" stroke="#8bc1ff" stroke-width="4" />
+      <line x1="${rightX}" y1="${baseY}" x2="${ridgeX}" y2="${ridgeY}" stroke="#8bc1ff" stroke-width="4" />
+      <line x1="${ridgeX}" y1="${ridgeY}" x2="${ridgeX}" y2="${baseY}" stroke="#31507d" stroke-dasharray="5 5" stroke-width="2" />
+      <text x="${ridgeX - 26}" y="${ridgeY - 10}" fill="#dce8ff" font-size="13">Конек</text>
+      <text x="${leftX + 170}" y="${baseY + 22}" fill="#aac0e8" font-size="13">Пролет ${span.toFixed(2)} м</text>
+      <text x="${ridgeX + 8}" y="${(baseY + ridgeY) / 2}" fill="#aac0e8" font-size="13">h=${h.toFixed(2)} м</text>
     `;
   }
 
-  function renderLive(matches) {
-    const live = matches.filter(isLive);
-    document.getElementById('live-meta').textContent = `Обновлено: ${new Date().toLocaleTimeString('ru-RU')} · live: ${live.length}`;
-    document.getElementById('live-list').innerHTML = live.length ? live.map(matchRow).join('') : '<div class="empty">Сейчас матчей нет.</div>';
-  }
+  function calculate() {
+    const span = readNum('span');
+    const length = readNum('length');
+    const pitch = readNum('pitch');
+    const step = readNum('step');
+    const snow = readNum('snow');
+    const wind = readNum('wind');
+    const roofDead = Number(document.getElementById('roofType').value);
 
-  function renderTomorrow(matches) {
-    document.getElementById('tomorrow-meta').textContent = `Найдено матчей: ${matches.length}`;
-    document.getElementById('tomorrow-list').innerHTML = matches.length ? matches.map(matchRow).join('') : '<div class="empty">Завтра по играм пусто.</div>';
-  }
+    const slopeFactor = 1 / Math.cos(pitch * Math.PI / 180);
+    const totalArea = span * length * slopeFactor;
 
-  async function loadLiveMatches() {
-    const html = await fetchKhlHtml(new Date());
-    const matches = parseKhlMatchesFromHtml(html);
-    renderLive(matches);
-  }
+    const qArea = roofDead + snow + 0.6 * wind + 30; // + эксплуатация 30 кг/м²
+    const qLineKgM = qArea * step;
+    const qLine = qLineKgM * 9.81 / 1000; // кН/м
 
-  async function loadTomorrowMatches() {
-    const key = 'khl_tomorrow_cache_v2';
-    const cached = localStorage.getItem(key);
-    const now = Date.now();
+    const l = (span / 2) * slopeFactor; // длина стропильной ноги
+    const mMax = qLine * l * l / 8; // кН*м
 
-    if (cached) {
-      try {
-        const p = JSON.parse(cached);
-        if (now - p.savedAt < UPCOMING_TTL_MS && Array.isArray(p.matches)) {
-          renderTomorrow(p.matches);
-          return;
-        }
-      } catch (_) {}
+    let chosen = null;
+
+    for (const sec of sections) {
+      const sigma = (mMax * 1000000) / (sec.w * 1000); // МПа
+      const f = (5 * (qLine / 1000) * Math.pow(l * 1000, 4)) / (384 * eWood * sec.i * 10000);
+      const fLim = (l * 1000) / deflectionLimitRatio;
+
+      if (sigma <= sigmaAllow && f <= fLim) {
+        chosen = { sec, sigma, f, fLim };
+        break;
+      }
     }
 
-    const tomorrow = new Date();
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    const html = await fetchKhlHtml(tomorrow);
-    const matches = parseKhlMatchesFromHtml(html).filter((m) => !isLive(m));
-    localStorage.setItem(key, JSON.stringify({ savedAt: now, matches }));
-    renderTomorrow(matches);
-  }
+    const raftersCount = Math.floor(length / step) + 1;
+    const rafterLength = l + 0.5; // условно + свес
+    const timberVolume = chosen
+      ? ((chosen.sec.name.split('×')[0] / 1000) * (chosen.sec.name.split('×')[1] / 1000) * rafterLength * raftersCount * 2)
+      : 0;
 
-  function parseArticles(text) {
-    return text.split('\n---\n').map((c) => c.trim()).filter(Boolean).map((chunk, i) => {
-      const lines = chunk.split('\n');
-      const title = (lines.find((l) => l.startsWith('TITLE:')) || '').replace('TITLE:', '').trim() || `Статья ${i + 1}`;
-      const date = (lines.find((l) => l.startsWith('DATE:')) || '').replace('DATE:', '').trim() || 'без даты';
-      const bodyStart = lines.findIndex((l) => l.startsWith('BODY:'));
-      const body = bodyStart >= 0 ? lines.slice(bodyStart).join('\n').replace('BODY:', '').trim() : '';
-      return { title, date, body };
-    });
-  }
+    const result = document.getElementById('result');
 
-  async function loadArticles() {
-    const list = document.getElementById('articles-list');
-    try {
-      const res = await fetch('articles.txt?v=' + Date.now());
-      if (!res.ok) throw new Error('articles_missing');
-      const items = parseArticles(await res.text());
-      list.innerHTML = items.length ? items.map((a) => `
-        <div class="article">
-          <div class="article-title">${esc(a.title)}</div>
-          <div class="article-date">${esc(a.date)}</div>
-          <div>${esc(a.body)}</div>
-        </div>
-      `).join('') : '<div class="empty">Пока статей нет.</div>';
-    } catch (_) {
-      list.innerHTML = '<div class="empty">Не удалось загрузить articles.txt.</div>';
+    if (!chosen) {
+      result.innerHTML = `
+        <div class="warn"><b>Схема в заданных параметрах не проходит</b> по текущему набору сечений.</div>
+        <div>Линейная нагрузка: <b>${qLineKgM.toFixed(1)} кг/м</b></div>
+        <div>Макс. изгибающий момент: <b>${mMax.toFixed(2)} кН·м</b></div>
+        <div>Рекомендация: уменьшить шаг стропил, добавить промежуточную опору или увеличить сечение.</div>
+      `;
+    } else {
+      result.innerHTML = `
+        <div class="ok"><b>Подобрано сечение стропил: ${chosen.sec.name}</b></div>
+        <div>Суммарная приведенная нагрузка: <b>${qArea.toFixed(1)} кг/м²</b></div>
+        <div>Линейная нагрузка на стропило: <b>${qLineKgM.toFixed(1)} кг/м</b></div>
+        <div>Напряжение изгиба: <b>${chosen.sigma.toFixed(2)} МПа</b> (допустимо ${sigmaAllow} МПа)</div>
+        <div>Прогиб: <b>${chosen.f.toFixed(1)} мм</b> (лимит ${chosen.fLim.toFixed(1)} мм)</div>
+        <div>Количество пар стропил: <b>${raftersCount}</b></div>
+        <div>Ориентировочный объем древесины (стропила): <b>${timberVolume.toFixed(3)} м³</b></div>
+      `;
     }
+
+    drawScheme(span, pitch);
   }
 
-  function initTabs() {
-    document.querySelectorAll('.tab').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-        document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.tab).classList.add('active');
-      });
-    });
-  }
-
-  async function boot() {
-    initTabs();
-    await loadArticles();
-
-    try { await loadTomorrowMatches(); }
-    catch { document.getElementById('tomorrow-list').innerHTML = '<div class="empty">Ошибка загрузки матчей на завтра.</div>'; }
-
-    const pollLive = async () => {
-      try { await loadLiveMatches(); }
-      catch { document.getElementById('live-list').innerHTML = '<div class="empty">Ошибка загрузки live-матчей КХЛ.</div>'; }
-    };
-
-    await pollLive();
-    setInterval(pollLive, LIVE_REFRESH_MS);
-  }
-
-  boot();
+  document.getElementById('calcBtn').addEventListener('click', calculate);
+  calculate();
 </script>
 </body>
 </html>
